@@ -11,7 +11,8 @@
 
 ## Установка
 ```bash
-pip install -r requirements.txt
+python get-pip.py
+python -m pip install -r requirements.txt
 python app.py
 ```
 
