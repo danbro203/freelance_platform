@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Все доступные заказы</h2>
+<p class="text-muted">Выберите интересующий проект</p>
+<div class="card mb-4">
+<div class="card-body">
+<form method="GET" action="/orders">
+<div class="row g-3">
+<div class="col-md-5">
+<input type="text" name="search" class="form-control" placeholder="Поиск по названию..." value="{{search}}">
+</div>
+<div class="col-md-4">
+<select name="status" class="form-select">
+<option value="">Все статусы</option>
+<option value="open" {% if status=='open' %}selected{% endif %}>Открытые</option>
+<option value="in_progress" {% if status=='in_progress' %}selected{% endif %}>В работе</option>
+<option value="completed" {% if status=='completed' %}selected{% endif %}>Завершённые</option>
+</select>
+</div>
+<div class="col-md-3">
+<button type="submit" class="btn btn-primary w-100">Найти</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+<hr>
+{% if orders %}
+<div class="row">
+{% for o in orders %}
+<div class="col-md-6 mb-4">
+<div class="card shadow-sm h-100">
+<div class="card-body">
+<h5 class="card-title">{{o.title}}</h5>
+<p class="card-text">{{o.description[:150]}}{% if o.description|length > 150 %}...{% endif %}</p>
+<div class="mb-2">
+<small class="text-muted"><strong>Заказчик:</strong> {{o.client.username}}</small><br>
+<small class="text-muted"><strong>Дата:</strong> {{o.created_at.strftime('%d.%m.%Y')}}</small>
+</div>
+<span class="badge bg-info">{{o.status}}</span>
+</div>
+<div class="card-footer bg-transparent">
+<a href="/order/{{o.id}}" class="btn btn-sm btn-primary">Подробнее</a>
+</div>
+</div>
+</div>
+{% endfor %}
+</div>
+{% if pagination.pages > 1 %}
+<nav aria-label="Навигация по страницам">
+<ul class="pagination justify-content-center">
+<li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+<a class="page-link" href="?page={{pagination.prev_num}}&search={{search}}&status={{status}}">Назад</a>
+</li>
+{% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+{% if p %}
+<li class="page-item {% if p == pagination.page %}active{% endif %}">
+<a class="page-link" href="?page={{p}}&search={{search}}&status={{status}}">{{p}}</a>
+</li>
+{% else %}
+<li class="page-item disabled"><span class="page-link">...</span></li>
+{% endif %}
+{% endfor %}
+<li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+<a class="page-link" href="?page={{pagination.next_num}}&search={{search}}&status={{status}}">Вперёд</a>
+</li>
+</ul>
+</nav>
+{% endif %}
+{% else %}
+<div class="alert alert-warning">Заказов не найдено</div>
+{% endif %}
+{% endblock %}

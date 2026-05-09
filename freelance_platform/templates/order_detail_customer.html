@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card mb-4">
+<div class="card-header bg-primary text-white">
+<h4 class="mb-0">{{order.title}}</h4>
+</div>
+<div class="card-body">
+<p><strong>Описание:</strong></p>
+<p>{{order.description}}</p>
+<p><strong>Статус:</strong> <span class="badge bg-info">{{order.status}}</span></p>
+<p><small class="text-muted">Создан: {{order.created_at.strftime('%d.%m.%Y')}}</small></p>
+<hr>
+{% if order.status == 'in_progress' %}
+<a href="/complete_order/{{order.id}}" class="btn btn-success" onclick="return confirm('Завершить заказ?')">Завершить заказ</a>
+{% endif %}
+{% if order.status == 'completed' %}
+{% set has_review = order.reviews|length > 0 %}
+{% if not has_review %}
+<a href="/add_review/{{order.id}}" class="btn btn-warning">Оставить отзыв</a>
+{% else %}
+<span class="badge bg-success">Отзыв оставлен</span>
+{% endif %}
+{% endif %}
+</div>
+</div>
+<h4>Отклики ({{responses|length}})</h4>
+{% if responses %}
+<div class="row">
+{% for r in responses %}
+<div class="col-md-6 mb-3">
+<div class="card {% if r.status == 'accepted' %}border-success{% endif %}">
+<div class="card-body">
+<h5 class="card-title">
+<a href="/worker/{{r.worker.id}}">{{r.worker.username}}</a>
+{% if r.worker.average_rating() > 0 %}
+<small class="text-muted">⭐ {{r.worker.average_rating()|round(1)}}</small>
+{% endif %}
+</h5>
+<p class="card-text">{{r.message}}</p>
+{% if r.price %}
+<p><strong>Цена:</strong> {{r.price}} руб</p>
+{% endif %}
+<small class="text-muted">{{r.created_at.strftime('%d.%m.%Y')}}</small>
+</div>
+<div class="card-footer">
+{% if r.status == 'waiting' %}
+<a href="/accept_response/{{r.id}}" class="btn btn-sm btn-success">Принять</a>
+{% elif r.status == 'accepted' %}
+<span class="badge bg-success">Принят</span>
+{% endif %}
+</div>
+</div>
+</div>
+{% endfor %}
+</div>
+{% else %}
+<div class="alert alert-info">Пока нет откликов на этот заказ</div>
+{% endif %}
+{% endblock %}

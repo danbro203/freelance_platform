@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Кабинет работника</h2>
+<p class="text-muted">Добро пожаловать, {{current_user.username}}! 
+<a href="/worker/{{current_user.id}}" class="btn btn-sm btn-outline-primary">Мой профиль</a>
+</p>
+<hr>
+<div class="card mb-4">
+<div class="card-body">
+<form method="GET" action="/dashboard">
+<div class="row g-3">
+<div class="col-md-9">
+<input type="text" name="search" class="form-control" placeholder="Поиск заказов..." value="{{search}}">
+</div>
+<div class="col-md-3">
+<button type="submit" class="btn btn-primary w-100">Найти</button>
+</div>
+</div>
+</form>
+</div>
+</div>
+<h4>Доступные заказы</h4>
+{% if orders %}
+<div class="row">
+{% for o in orders %}
+<div class="col-md-6 mb-3">
+<div class="card">
+<div class="card-body">
+<h5 class="card-title">{{o.title}}</h5>
+<p class="card-text">{{o.description[:100]}}...</p>
+<small class="text-muted">Заказчик: {{o.client.username}}</small><br>
+<small class="text-muted">Дата: {{o.created_at.strftime('%d.%m.%Y')}}</small>
+</div>
+<div class="card-footer">
+<a href="/order/{{o.id}}" class="btn btn-sm btn-success">Откликнуться</a>
+</div>
+</div>
+</div>
+{% endfor %}
+</div>
+{% if pagination.pages > 1 %}
+<nav aria-label="Навигация">
+<ul class="pagination justify-content-center">
+<li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+<a class="page-link" href="?page={{pagination.prev_num}}&search={{search}}">Назад</a>
+</li>
+{% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+{% if p %}
+<li class="page-item {% if p == pagination.page %}active{% endif %}">
+<a class="page-link" href="?page={{p}}&search={{search}}">{{p}}</a>
+</li>
+{% else %}
+<li class="page-item disabled"><span class="page-link">...</span></li>
+{% endif %}
+{% endfor %}
+<li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+<a class="page-link" href="?page={{pagination.next_num}}&search={{search}}">Вперёд</a>
+</li>
+</ul>
+</nav>
+{% endif %}
+{% else %}
+<div class="alert alert-warning">Сейчас нет доступных заказов{% if search %} по запросу "{{search}}"{% endif %}</div>
+{% endif %}
+<hr>
+<h4>Мои отклики</h4>
+{% if responses %}
+<ul class="list-group">
+{% for r in responses %}
+<li class="list-group-item">
+<strong>{{r.order.title}}</strong><br>
+<small>Статус: 
+{% if r.status == 'waiting' %}<span class="badge bg-warning">Ожидание</span>
+{% elif r.status == 'accepted' %}<span class="badge bg-success">Принят</span>
+{% else %}<span class="badge bg-danger">Отклонён</span>
+{% endif %}
+</small>
+</li>
+{% endfor %}
+</ul>
+{% else %}
+<p class="text-muted">Вы ещё не откликались на заказы</p>
+{% endif %}
+{% endblock %}

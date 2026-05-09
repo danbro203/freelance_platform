@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Кабинет заказчика</h2>
+<p class="text-muted">Добро пожаловать, {{current_user.username}}!</p>
+<hr>
+<a href="/create_order" class="btn btn-primary mb-3">Создать новый заказ</a>
+<h4>Мои заказы</h4>
+{% if orders %}
+<div class="table-responsive">
+<table class="table table-striped">
+<thead class="table-dark">
+<tr>
+<th>ID</th>
+<th>Название</th>
+<th>Статус</th>
+<th>Откликов</th>
+<th>Дата</th>
+<th>Действия</th>
+</tr>
+</thead>
+<tbody>
+{% for o in orders %}
+<tr>
+<td>{{o.id}}</td>
+<td>{{o.title}}</td>
+<td><span class="badge bg-info">{{o.status}}</span></td>
+<td><span class="badge bg-secondary">{{o.responses|length}}</span></td>
+<td>{{o.created_at.strftime('%d.%m.%Y')}}</td>
+<td>
+<a href="/order/{{o.id}}" class="btn btn-sm btn-primary">Подробнее</a>
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+{% else %}
+<div class="alert alert-info">
+У вас пока нет заказов. Создайте первый заказ!
+</div>
+{% endif %}
+{% endblock %}
